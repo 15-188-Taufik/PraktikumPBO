@@ -73,8 +73,6 @@ def edit_note():
     content_text.delete("1.0", tk.END)
     messagebox.showinfo("Sukses", "Catatan berhasil diperbarui!")
 
-# Memuat catatan akan dipanggil setelah notes_listbox dibuat
-
 # Fungsi untuk menampilkan isi catatan
 def show_note_details():
     selected = notes_listbox.curselection()
@@ -119,6 +117,16 @@ root = tk.Tk()
 root.title("Aplikasi Catatan")
 root.configure(bg=BG_COLOR)
 
+# Set initial window size and make it maximized
+root.geometry("1000x500")  # Ukuran awal 1000x600 pixels
+root.minsize(800, 500)     # Ukuran minimum window
+
+# Configure grid layout
+root.grid_rowconfigure(0, weight=1)
+root.grid_columnconfigure(0, weight=1)
+root.grid_columnconfigure(1, weight=0)  # Spacer
+root.grid_columnconfigure(2, weight=1)
+
 # Menu bar
 menu_bar = Menu(root, bg=INPUT_COLOR, fg=TEXT_COLOR)
 file_menu = Menu(menu_bar, tearoff=0, bg=INPUT_COLOR, fg=TEXT_COLOR)
@@ -133,60 +141,72 @@ root.config(menu=menu_bar)
 
 # Frame input
 input_frame = tk.Frame(root, bg=BG_COLOR)
-input_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+input_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+input_frame.grid_rowconfigure(1, weight=1)
+input_frame.grid_columnconfigure(1, weight=1)
 
 # Input judul
 tk.Label(input_frame, text="Judul Catatan:", bg=BG_COLOR, fg="black").grid(row=0, column=0, sticky="w")
-title_entry = tk.Entry(input_frame, width=50, bg=INPUT_COLOR, fg=TEXT_COLOR, insertbackground=TEXT_COLOR)
-title_entry.grid(row=0, column=1, padx=5, pady=5)
+title_entry = tk.Entry(input_frame, bg=INPUT_COLOR, fg=TEXT_COLOR, 
+                      insertbackground=TEXT_COLOR)
+title_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
 # Input konten
 tk.Label(input_frame, text="Isi Catatan:", bg=BG_COLOR, fg="black").grid(row=1, column=0, sticky="nw", padx=5)
-content_text = tk.Text(input_frame, width=50, height=15, bg=INPUT_COLOR, fg=TEXT_COLOR, 
+content_text = tk.Text(input_frame, bg=INPUT_COLOR, fg=TEXT_COLOR, 
                       insertbackground=TEXT_COLOR, wrap=tk.WORD)
-content_text.grid(row=1, column=1, padx=5, pady=5)
+content_text.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
 
 # Tombol aksi
-button_frame = tk.Frame(root, bg=BG_COLOR)
-button_frame.grid(row=1, column=0, columnspan=2, pady=10)
+# Tombol kiri (Tambah dan Simpan)
+left_button_frame = tk.Frame(root, bg=BG_COLOR)
+left_button_frame.grid(row=1, column=0, pady=10, sticky="ew")
 
 button_style = {
     "bg": INPUT_COLOR,
     "fg": TEXT_COLOR,
     "activebackground": "#555555",
-    "activeforeground": TEXT_COLOR
+    "activeforeground": TEXT_COLOR,
+    "padx": 18,  # Tambahkan padding horizontal internal
+    "pady": 4   # Tambahkan padding vertikal internal
 }
 
-add_button = tk.Button(button_frame, text="Tambah Baru", command=add_note, **button_style)
-add_button.grid(row=0, column=0, padx=5)
+add_button = tk.Button(left_button_frame, text="Tambah Baru", command=add_note, **button_style)
+add_button.pack(side=tk.LEFT, padx=(95, 5))  # Tambahkan margin kiri 10px, kanan 5px
 
-edit_button = tk.Button(button_frame, text="Simpan Perubahan", command=edit_note, **button_style)
-edit_button.grid(row=0, column=1, padx=5)
+edit_button = tk.Button(left_button_frame, text="Simpan Perubahan", command=edit_note, **button_style)
+edit_button.pack(side=tk.LEFT, padx=(10, 5))  # Tambahkan margin kiri 10px, kanan 5px
 
-show_button = tk.Button(button_frame, text="Tampilkan Catatan", command=show_note_details, **button_style)
-show_button.grid(row=0, column=2, padx=5)
-
-delete_button = tk.Button(button_frame, text="Hapus Catatan", command=delete_note, **button_style)
-delete_button.grid(row=0, column=3, padx=5)
+# Frame daftar catatan (kanan)
+list_frame = tk.Frame(root, bg=BG_COLOR)
+list_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+list_frame.grid_rowconfigure(1, weight=1)
+list_frame.grid_columnconfigure(0, weight=1)
 
 # Daftar catatan
-list_frame = tk.Frame(root, bg=BG_COLOR)
-list_frame.grid(row=0, column=2, rowspan=2, padx=10, pady=10)
-
-tk.Label(list_frame, text="Daftar Catatan:", bg=BG_COLOR, fg="black").pack()
-notes_listbox = tk.Listbox(list_frame, width=40, height=20, bg=LIST_COLOR, fg=TEXT_COLOR,
+tk.Label(list_frame, text="Daftar Catatan:", bg=BG_COLOR, fg="black").pack(anchor="w")
+notes_listbox = tk.Listbox(list_frame, bg=LIST_COLOR, fg=TEXT_COLOR,
                           selectbackground="#555555", selectforeground=TEXT_COLOR)
-notes_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+notes_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
 scrollbar = tk.Scrollbar(list_frame, orient=tk.VERTICAL, bg=LIST_COLOR)
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
 notes_listbox.config(yscrollcommand=scrollbar.set)
 scrollbar.config(command=notes_listbox.yview)
-scrollbar.config(command=notes_listbox.yview)
+
+# Tombol kanan (Tampilkan dan Hapus)
+right_button_frame = tk.Frame(root, bg=BG_COLOR)
+right_button_frame.grid(row=1, column=2, pady=10, sticky="ew")
+
+show_button = tk.Button(right_button_frame, text="Tampilkan Catatan", command=show_note_details, **button_style)
+show_button.pack(side=tk.LEFT, padx=(10, 5))
+
+delete_button = tk.Button(right_button_frame, text="Hapus Catatan", command=delete_note, **button_style)
+delete_button.pack(side=tk.LEFT, padx=5)
 
 # Memuat catatan saat aplikasi dibuka
 load_notes()
+
 # Menyimpan catatan saat aplikasi ditutup
 root.protocol("WM_DELETE_WINDOW", lambda: (save_notes(), root.destroy()))
 
